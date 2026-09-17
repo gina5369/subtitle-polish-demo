@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>字幕润色质量检测 Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">字幕润色质量检测 Demo</div>
+      <div id="templateBar" class="template-bar"></div>
+      <button id="addTemplateBtn" class="icon-btn" title="新增字幕润色模板">+</button>
+      <label class="judge-template">
+        <span>质检分析模板ID</span>
+        <input id="judgeTemplateInput" placeholder="填写真实质检模板ID" />
+      </label>
+      <button id="batchPolishBtn" class="primary-btn">批量润色</button>
+      <button id="batchCheckBtn" class="primary-btn">润色质检检测</button>
+      <button id="exportBtn" class="primary-btn">导出</button>
+      <button id="mergedExportBtn" class="primary-btn">合并文件导出</button>
+      <button id="conclusionDownloadBtn" class="primary-btn">结论下载</button>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel upload-panel">
+          <div class="panel-title-row">
+            <h2>条目列表</h2>
+            <label class="file-btn">
+              选择文件
+              <input id="fileInput" type="file" accept=".json,application/json" />
+            </label>
+          </div>
+          <div class="batch-row">
+            <label class="check-all">
+              <input id="selectAllInput" type="checkbox" />
+              全选
+            </label>
+            <span id="fileMeta" class="muted">未上传文件</span>
+          </div>
+        </section>
+
+        <section id="fileList" class="file-list empty">
+          <div class="empty-state">请选择字幕 JSON 文件</div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <section id="summaryPanel" class="summary-panel">
+          <div>
+            <div class="summary-label">推荐结论</div>
+            <div id="winnerText" class="winner-text">暂无质检结果，完成质检后生成推荐结论。</div>
+          </div>
+          <div id="scoreTable" class="score-table"></div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-head">
+            <h2>字幕原文</h2>
+            <div class="section-actions">
+              <span id="originalRows" class="pill">行数 --</span>
+              <button id="copyOriginalBtn" class="small-btn">复制</button>
+            </div>
+          </div>
+          <pre id="originalView" class="code-view">上传文件后显示字幕原文</pre>
+        </section>
+
+        <section class="content-section">
+          <div class="section-head">
+            <h2>字幕润色</h2>
+            <div class="section-actions">
+              <span id="polishHint" class="muted">润色后显示各模板结果</span>
+            </div>
+          </div>
+          <div id="polishResults" class="result-grid"></div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-head">
+            <h2>润色质量</h2>
+            <div class="section-actions">
+              <span id="qualityHint" class="muted">质检后显示评分与问题</span>
+            </div>
+          </div>
+          <div id="qualityResults" class="result-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <script>
+      const params = new URLSearchParams(location.search);
+      const shouldUseLocalMock = params.get("mock") === "1";
+      if (shouldUseLocalMock) {
+        document.write('<script src="./mock-runtime.js"><\/script>');
+      }
+    </script>
+    <script src="./app.js"></script>
+  </body>
+</html>
