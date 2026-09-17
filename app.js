@@ -1,7 +1,8 @@
 const defaultTemplates = [""];
 const defaultJudgeTemplate = "";
-const fixedTechEndpoint = "devaw.aoscdn.com/tech";
-const fixedXApiKey = "wx40d7754m8oubrds";
+// Real requests are sent through the server-side proxy configured by Streamlit.
+const fixedTechEndpoint = "";
+const fixedXApiKey = "";
 const maxConcurrentTasks = 6;
 const polishChunkSize = 60;
 

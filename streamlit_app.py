@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import streamlit as st
@@ -17,10 +18,20 @@ def escape_script(content: str) -> str:
     return content.replace("</script", "<\\/script")
 
 
-def build_embedded_html() -> str:
+def read_secret(name: str) -> str:
+    try:
+        return str(st.secrets.get(name, "")).strip()
+    except FileNotFoundError:
+        return ""
+
+
+def json_for_script(value: object) -> str:
+    return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
+
+
+def build_embedded_html(api_base_url: str) -> str:
     html = read_text("index.html")
     css = read_text("styles.css")
-    mock_js = escape_script(read_text("mock-runtime.js"))
     app_js = escape_script(read_text("app.js"))
 
     html = html.replace(
@@ -32,7 +43,21 @@ def build_embedded_html() -> str:
     end = html.index('    <script src="./app.js"></script>') + len(
         '    <script src="./app.js"></script>'
     )
-    scripts = f'''    <script>
+    if api_base_url:
+        api_base_url = api_base_url.rstrip("/")
+        runtime_settings = {
+            "subtitlePolishPolishEndpoint": f"{api_base_url}/api/subtitle/polish",
+            "subtitlePolishQualityEndpoint": f"{api_base_url}/api/subtitle/polish/quality-check",
+        }
+        scripts = f'''    <script>
+Object.assign(window, {json_for_script(runtime_settings)});
+    </script>
+    <script>
+{app_js}
+    </script>'''
+    else:
+        mock_js = escape_script(read_text("mock-runtime.js"))
+        scripts = f'''    <script>
 {mock_js}
     </script>
     <script>
@@ -43,4 +68,4 @@ def build_embedded_html() -> str:
 
 
 st.set_page_config(page_title="字幕润色质量检测 Demo", layout="wide")
-components.html(build_embedded_html(), height=920, scrolling=True)
+components.html(build_embedded_html(read_secret("REAL_API_BASE_URL")), height=920, scrolling=True)

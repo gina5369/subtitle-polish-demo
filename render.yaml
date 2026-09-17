@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: subtitle-polish-api
+    runtime: python
+    buildCommand: pip install -r requirements-api.txt
+    startCommand: uvicorn api_server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: TECH_API_KEY
+        sync: false
+      - key: TECH_API_BASE_URL
+        value: https://devaw.aoscdn.com/tech
+      - key: ALLOWED_ORIGINS
+        value: https://subtitle-polish-demo-gina.streamlit.app
