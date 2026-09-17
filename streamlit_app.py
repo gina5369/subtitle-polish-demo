@@ -29,7 +29,11 @@ def json_for_script(value: object) -> str:
     return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
 
 
-def build_embedded_html(api_base_url: str) -> str:
+def build_embedded_html(
+    api_base_url: str,
+    direct_tech_api_base: str,
+    direct_tech_api_key: str,
+) -> str:
     html = read_text("index.html")
     css = read_text("styles.css")
     app_js = escape_script(read_text("app.js"))
@@ -55,6 +59,18 @@ Object.assign(window, {json_for_script(runtime_settings)});
     <script>
 {app_js}
     </script>'''
+    elif direct_tech_api_key:
+        runtime_settings = {
+            "subtitlePolishUseDirectRuntime": True,
+            "subtitlePolishDirectTechEndpoint": direct_tech_api_base.rstrip("/"),
+            "subtitlePolishDirectXApiKey": direct_tech_api_key,
+        }
+        scripts = f'''    <script>
+Object.assign(window, {json_for_script(runtime_settings)});
+    </script>
+    <script>
+{app_js}
+    </script>'''
     else:
         mock_js = escape_script(read_text("mock-runtime.js"))
         scripts = f'''    <script>
@@ -68,4 +84,12 @@ Object.assign(window, {json_for_script(runtime_settings)});
 
 
 st.set_page_config(page_title="字幕润色质量检测 Demo", layout="wide")
-components.html(build_embedded_html(read_secret("REAL_API_BASE_URL")), height=920, scrolling=True)
+components.html(
+    build_embedded_html(
+        read_secret("REAL_API_BASE_URL"),
+        read_secret("DIRECT_TECH_API_BASE") or "devaw.aoscdn.com/tech",
+        read_secret("DIRECT_TECH_API_KEY"),
+    ),
+    height=920,
+    scrolling=True,
+)

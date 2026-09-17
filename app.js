@@ -1,8 +1,7 @@
 const defaultTemplates = [""];
 const defaultJudgeTemplate = "";
-// Real requests are sent through the server-side proxy configured by Streamlit.
-const fixedTechEndpoint = "";
-const fixedXApiKey = "";
+const fixedTechEndpoint = window.subtitlePolishDirectTechEndpoint || "";
+const fixedXApiKey = window.subtitlePolishDirectXApiKey || "";
 const maxConcurrentTasks = 6;
 const polishChunkSize = 60;
 
@@ -1563,6 +1562,10 @@ async function callRealModelRuntime(type, payload, onTaskCreated) {
     return response;
   }
 
+  if (window.subtitlePolishUseDirectRuntime) {
+    return requestLlmTaskByTemplateId(type, payload, onTaskCreated);
+  }
+
   const endpoint = getConfiguredBackendEndpoint(type);
   if (endpoint) {
     return postJson(endpoint, payload);
@@ -1698,9 +1701,25 @@ function cleanMarkdownCodeBlock(text) {
 }
 
 async function postJson(url, payload) {
+  let accessCode = "";
+  try {
+    accessCode = sessionStorage.getItem("subtitlePolishAccessCode") || "";
+    if (!accessCode) {
+      accessCode = window.prompt("请输入访问码：") || "";
+      accessCode = accessCode.trim();
+      if (!accessCode) throw new Error("需要访问码才能调用真实接口。");
+      sessionStorage.setItem("subtitlePolishAccessCode", accessCode);
+    }
+  } catch (error) {
+    throw new Error(error?.message || "需要访问码才能调用真实接口。");
+  }
+
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Subtitle-Access-Code": accessCode,
+    },
     body: JSON.stringify(payload),
     credentials: "include",
   });
